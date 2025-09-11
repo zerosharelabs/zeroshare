@@ -11,7 +11,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # ASCII Art
-printf "${CYAN}"
+printf "${YELLOW}"
 cat <<'EOF'
 
 ███████╗███████╗██████╗░░█████╗░░██████╗██╗░░██╗░█████╗░██████╗░███████╗
@@ -24,28 +24,17 @@ EOF
 printf "${NC}"
 
 # Friendly intro
-printf "${CYAN}Welcome to the ZeroShare Production Quickstart!${NC}\n"
-printf "${YELLOW}This script will help you set up your environment and Docker configuration for a secure production deployment.${NC}\n\n"
+printf "${YELLOW}\nWelcome to the ZeroShare Production Quickstart!\n${NC}"
+printf "${YELLOW}\nThis script will set up your environment and Docker configuration for a secure production deployment.\n${NC}"
+printf "${YELLOW}\nNo input required. Default values will be used for all settings.\n${NC}"
 
-# Prompt for required values with defaults
-printf "${YELLOW}Enter your domain [zeroshare.io]: ${NC}"
-read DOMAIN
-DOMAIN=${DOMAIN:-zeroshare.io}
-printf "${YELLOW}Enter admin email [ssl@zeroshare.io]: ${NC}"
-read EMAIL
-EMAIL=${EMAIL:-ssl@zeroshare.io}
-printf "${YELLOW}Enter SMTP host [mail.smtp2go.com]: ${NC}"
-read SMTP_HOST
-SMTP_HOST=${SMTP_HOST:-mail.smtp2go.com}
-printf "${YELLOW}Enter SMTP port [587]: ${NC}"
-read SMTP_PORT
-SMTP_PORT=${SMTP_PORT:-587}
-printf "${YELLOW}Enter SMTP user [zeroshare.io]: ${NC}"
-read SMTP_USER
-SMTP_USER=${SMTP_USER:-zeroshare.io}
-printf "${YELLOW}Enter SMTP password: ${NC}"
-read -s SMTP_PASSWORD
-echo
+# Default values
+DOMAIN="zeroshare.io"
+EMAIL="ssl@zeroshare.io"
+SMTP_HOST="mail.smtp2go.com"
+SMTP_PORT="587"
+SMTP_USER="zeroshare.io"
+SMTP_PASSWORD=$(openssl rand -hex 16)
 
 # Generate random secrets
 generate_secret() {
@@ -85,6 +74,82 @@ EOF
 else
   printf "${YELLOW}.env file already exists. Skipping creation.${NC}\n"
 fi
+
+if [ ! -f "$docker_compose_target" ]; then
+  printf "${YELLOW}\nGenerating docker-compose.yml for production...\n${NC}"
+  cat <<EOF > $docker_compose_target
+services:
+  zeroshare:
+    image: ghcr.io/zerosharelabs/zeroshare:latest
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      ARGON2_SECRET: ${ARGON2_SECRET}
+      DOMAIN: ${DOMAIN}
+      EMAIL: ${EMAIL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      BETTER_AUTH_TELEMETRY: 0
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - zeroshare_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ssl_certificates:/etc/letsencrypt
+
+  database:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - zeroshare_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ssl_certificates:
+    driver: local
+  postgres_data:
+    driver: local
+networks:
+  zeroshare_network:
+    driver: bridge
+EOF
+  printf "${YELLOW}\ndocker-compose.yml for production created.\n${NC}"
+else
+  printf "${YELLOW}\ndocker-compose.yml already exists. Skipping creation.\n${NC}"
+fi
+
+printf "${YELLOW}\nRun 'docker compose up -d' to start ZeroShare in production mode.\n${NC}"
+
+# Thank you and call to action
+printf "${YELLOW}\nThank you for using ZeroShare!\n${NC}"
+printf "${YELLOW}If you like this project, please consider starring us on GitHub: https://github.com/zerosharelabs/zeroshare\n${NC}"
+printf "${YELLOW}Or support development with a donation!\n${NC}"
+printf "${YELLOW}Have a great and secure day!\n${NC}"
 
 docker_compose_target="docker-compose.yml"
 if [ ! -f "$docker_compose_target" ]; then
