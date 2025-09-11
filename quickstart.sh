@@ -75,11 +75,13 @@ else
   printf "${YELLOW}\n.env file already exists. Skipping creation.\n${NC}"
 fi
 
+# Ensure docker_compose_target is set right before usage
+
 docker_compose_target="docker-compose.yml"
 
 if [ ! -f "$docker_compose_target" ]; then
   printf "${YELLOW}\nGenerating docker-compose.yml for production...\n${NC}"
-  cat <<EOF > $docker_compose_target
+  cat <<EOF > "$docker_compose_target"
 services:
   zeroshare:
     image: ghcr.io/zerosharelabs/zeroshare:latest
