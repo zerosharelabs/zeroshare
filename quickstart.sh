@@ -22,6 +22,7 @@ EOF
 printf "${NC}"
 
 # Default values
+env_file=".env"
 DOMAIN="zeroshare.io"
 EMAIL="ssl@zeroshare.io"
 SMTP_HOST="mail.smtp2go.com"
