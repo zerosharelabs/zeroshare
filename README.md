@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="frontend/src/assets/logo-black.svg" alt="ZeroShare Logo" width="180" />
+  <img src="frontend/src/assets/logo-white.svg" alt="ZeroShare Logo" width="180" />
   <br>
   <strong>Share securely with ZeroShare</strong>
   <br>
@@ -10,15 +10,12 @@
   <a href="https://github.com/zerosharelabs/zeroshare/releases"><img src="https://img.shields.io/github/v/release/zerosharelabs/zeroshare?label=release" alt="Release"></a>
   <a href="https://github.com/zerosharelabs/zeroshare/blob/main/LICENSE"><img src="https://img.shields.io/github/license/zerosharelabs/zeroshare" alt="License"></a>
 </div>
-
-# ZeroShare
-
+<br/>
 Securely Share Passwords, Secrets or Sensitive Information With Self-Destructing Links.
 Send sensitive information with Client-Side AES-GCM Encryption, One-Time Self-Destructing Links, Zero Logs & Zero Activity Tracking.
+<br/><br/>
 
 ![ZeroShare](github.png)
-
-[Visit Website](https://zeroshare.io)
 
 ## Selfhosted
 
