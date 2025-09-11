@@ -27,6 +27,7 @@ DOMAIN="zeroshare.io"
 EMAIL="ssl@zeroshare.io"
 SMTP_HOST="mail.smtp2go.com"
 SMTP_PORT="587"
+SMTP_USER="zeroshare.io"
 
 
 # Function to generate a random secret
