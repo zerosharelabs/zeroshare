@@ -87,18 +87,18 @@ services:
     image: ghcr.io/zerosharelabs/zeroshare:latest
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      ARGON2_SECRET: ${ARGON2_SECRET}
-      DOMAIN: ${DOMAIN}
-      EMAIL: ${EMAIL}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      DATABASE_URL: \\${DATABASE_URL}
+      ENCRYPTION_KEY: \\${ENCRYPTION_KEY}
+      ARGON2_SECRET: \\${ARGON2_SECRET}
+      DOMAIN: \\${DOMAIN}
+      EMAIL: \\${EMAIL}
+      BETTER_AUTH_SECRET: \\${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: \\${BETTER_AUTH_URL}
       BETTER_AUTH_TELEMETRY: 0
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_HOST: \\${SMTP_HOST}
+      SMTP_PORT: \\${SMTP_PORT}
+      SMTP_USER: \\${SMTP_USER}
+      SMTP_PASSWORD: \\${SMTP_PASSWORD}
     ports:
       - "80:80"
       - "443:443"
@@ -119,16 +119,16 @@ services:
   database:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=\\${POSTGRES_DB}
+      - POSTGRES_USER=\\${POSTGRES_USER}
+      - POSTGRES_PASSWORD=\\${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - zeroshare_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U \\${POSTGRES_USER} -d \\${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
