@@ -43,7 +43,7 @@ generate_secret() {
 
 env_file=".env"
 if [ ! -f "$env_file" ]; then
-  printf "${CYAN}Generating .env file with secrets...${NC}\n"
+  printf "${YELLOW}\nGenerating .env file with secrets...\n${NC}"
   ENCRYPTION_KEY=$(generate_secret)
   ARGON2_SECRET=$(generate_secret)
   BETTER_AUTH_SECRET=$(generate_secret)
@@ -70,10 +70,12 @@ SMTP_PORT=$SMTP_PORT
 SMTP_USER=$SMTP_USER
 SMTP_PASSWORD=$SMTP_PASSWORD
 EOF
-  printf "${GREEN}.env file created with random secrets. Please review and update non-secret values as needed.${NC}\n"
+  printf "${YELLOW}\n.env file created with random secrets. Please review and update non-secret values as needed.\n${NC}"
 else
-  printf "${YELLOW}.env file already exists. Skipping creation.${NC}\n"
+  printf "${YELLOW}\n.env file already exists. Skipping creation.\n${NC}"
 fi
+
+docker_compose_target="docker-compose.yml"
 
 if [ ! -f "$docker_compose_target" ]; then
   printf "${YELLOW}\nGenerating docker-compose.yml for production...\n${NC}"
@@ -152,6 +154,7 @@ printf "${YELLOW}Or support development with a donation!\n${NC}"
 printf "${YELLOW}Have a great and secure day!\n${NC}"
 
 docker_compose_target="docker-compose.yml"
+
 if [ ! -f "$docker_compose_target" ]; then
   printf "${CYAN}Generating docker-compose.yml for production...${NC}\n"
   cat <<EOF > $docker_compose_target
