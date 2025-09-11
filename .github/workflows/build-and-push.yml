@@ -61,14 +61,6 @@ jobs:
             docker push ghcr.io/${{ github.repository }}:latest
           fi
 
-      - name: Make image public
-        run: |
-          curl -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" \
-            https://api.github.com/orgs/zerosharelabs/packages/container/zeroshare/visibility \
-            -d '{"visibility":"public"}'
-
       - name: Summary
         run: |
           echo "Docker image built and pushed to: ghcr.io/${{ github.repository }}:${{ steps.set_tag.outputs.tag }}"
