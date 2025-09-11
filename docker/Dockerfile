@@ -45,9 +45,9 @@ RUN chmod +x /entrypoint.sh
 WORKDIR /app/server
 RUN npm ci --omit=dev
 
-# Install only production dependencies for frontend
+# Install frontend dependencies
 WORKDIR /app/frontend
-RUN npm ci --omit=dev
+RUN npm i
 
 # Expose ports
 EXPOSE 80 443
