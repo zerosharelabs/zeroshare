@@ -1,3 +1,16 @@
+<div align="center">
+  <img src="frontend/src/assets/logo-black.svg" alt="ZeroShare Logo" width="180" />
+  <br>
+  <strong>Share securely with ZeroShare</strong>
+  <br>
+  <a href="https://zeroshare.io">zeroshare.io</a>
+  <br><br>
+  <!-- GitHub Badges -->
+  <a href="https://github.com/zerosharelabs/zeroshare/stargazers"><img src="https://img.shields.io/github/stars/zerosharelabs/zeroshare?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/zerosharelabs/zeroshare/releases"><img src="https://img.shields.io/github/v/release/zerosharelabs/zeroshare?label=release" alt="Release"></a>
+  <a href="https://github.com/zerosharelabs/zeroshare/blob/main/LICENSE"><img src="https://img.shields.io/github/license/zerosharelabs/zeroshare" alt="License"></a>
+</div>
+
 # ZeroShare
 
 Securely Share Passwords, Secrets or Sensitive Information With Self-Destructing Links.
