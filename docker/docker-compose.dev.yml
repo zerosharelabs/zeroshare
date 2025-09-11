@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: zeroshare-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zeroshare
+      POSTGRES_PASSWORD: zeroshare_dev_password
+      POSTGRES_DB: zeroshare
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zeroshare -d zeroshare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeroshare-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  zeroshare-network:
+    driver: bridge

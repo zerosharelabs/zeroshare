@@ -1,0 +1,60 @@
+   {REQUESTS_ENABLED && (
+              <div
+                className={cn(
+                  "gap-1 flex items-center justify-between p-1 w-full text-sm border border-neutral-800 border-b-0 z-10 relative top-0 ",
+                  "peer-focus:border-neutral-400",
+                  activeTab === "request" && "border-b"
+                )}
+              >
+                <button
+                  onClick={() => setActiveTab("share")}
+                  className={cn(
+                    "w-full flex items-center justify-center text-neutral-400 font-medium py-4 font-mono gap-2",
+                    activeTab === "share"
+                      ? "bg-neutral-850 text-neutral-200"
+                      : "hover:bg-neutral-900"
+                  )}
+                >
+                  <MessageSquareLockIcon size={16} />
+                  Share Secret
+                </button>
+                <button
+                  onClick={() => setActiveTab("request")}
+                  className={cn(
+                    "w-full flex items-center justify-center text-neutral-400 font-medium py-4 font-mono gap-2",
+                    activeTab === "request"
+                      ? "bg-neutral-850 text-neutral-200"
+                      : "hover:bg-neutral-900"
+                  )}
+                >
+                  <MessageSquareShareIcon size={16} />
+                  Request Secret
+                </button>
+              </div>
+            )}
+
+
+
+
+                    {activeTab === "request" && (
+          <fieldset className="flex flex-col gap-2 w-full">
+            <div className="flex gap-4">
+              <Input
+                type="text"
+                value={"https://zeroshare.io/request/123"}
+                readOnly
+                icon={<GlobeLockIcon size={16} />}
+                placeholder="request link"
+              />
+              <PrimaryButton className="w-56">
+                <CopyIcon size={16} />
+                Copy Link
+              </PrimaryButton>
+            </div>
+            <div>
+              <p className="text-neutral-400 text-sm mt-2">
+                Share this link with the person you want to request a secret.
+              </p>
+            </div>
+          </fieldset>
+        )}

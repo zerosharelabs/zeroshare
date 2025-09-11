@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@import "material-symbols/sharp";
+
+:root {
+  overscroll-behavior: none;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+.material-symbols-sharp {
+  font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 48;
+}
+
+@theme {
+  /* Gray scale */
+  --color-neutral-450: oklch(0.6 0 0);
+  --color-neutral-850: oklch(0.235 0 0);
+  --color-neutral-925: oklch(0.18 0 0);
+  --color-neutral-940: oklch(0.165 0 0);
+
+  /* Red scale */
+  --color-red-50: oklch(95% 0.022 17.62);
+  --color-red-100: oklch(90.29% 0.044 18.03);
+  --color-red-200: oklch(79.62% 0.101 19.57);
+  --color-red-300: oklch(70.17% 0.167 22.33);
+  --color-red-400: oklch(60.41% 0.223 27.17);
+  --color-red-500: oklch(49.18% 0.182 27.18);
+  --color-red-600: oklch(42.5% 0.157 27.14);
+  --color-red-700: oklch(35.25% 0.13 27.18);
+  --color-red-800: oklch(27.91% 0.103 27.14);
+  --color-red-900: oklch(21.83% 0.08 27.05);
+  --color-red-950: oklch(17.16% 0.063 26.99);
+
+  /* Indigo scale */
+  --color-indigo-50: oklch(94.85% 0.021 288.92);
+  --color-indigo-100: oklch(90.77% 0.038 288.93);
+  --color-indigo-200: oklch(81.53% 0.078 288.64);
+  --color-indigo-300: oklch(71.56% 0.125 287.55);
+  --color-indigo-400: oklch(62.48% 0.166 285.73);
+  --color-indigo-500: oklch(53.43% 0.205 283.44);
+  --color-indigo-600: oklch(46.43% 0.224 280.99);
+  --color-indigo-700: oklch(38.21% 0.185 280.94);
+  --color-indigo-800: oklch(30.93% 0.15 280.71);
+  --color-indigo-900: oklch(22.69% 0.111 281.44);
+  --color-indigo-950: oklch(17.45% 0.084 280.94);
+
+  /* Yellow scale */
+  --color-yellow-50: oklch(99% 0.043 109.96);
+  --color-yellow-100: oklch(99% 0.043 109.96);
+  --color-yellow-200: oklch(96.81% 0.156 110.54);
+  --color-yellow-300: oklch(95.75% 0.171 110.65);
+  --color-yellow-400: oklch(94.87% 0.17 110.67);
+  --color-yellow-500: oklch(93.41% 0.167 110.7);
+  --color-yellow-600: oklch(77.98% 0.14 110.61);
+  --color-yellow-700: oklch(61.64% 0.111 111.08);
+  --color-yellow-800: oklch(45.36% 0.081 110.14);
+  --color-yellow-900: oklch(29.95% 0.054 110.76);
+  --color-yellow-950: oklch(21.49% 0.038 111.52);
+
+  /* Background and foreground */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Font families */
+  --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Animation */
+  --animation-spotlight: spotlight 2s ease 0.75s 1 forwards;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  @apply bg-neutral-950;
+}
+
+.text-stroke {
+  color: black;
+  text-shadow: -1px 1px 0 white, 1px 1px 0 white, 1px -1px 0 white,
+    -1px -1px 0 white;
+}
+
+.anchor {
+  scroll-margin-top: 40px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease forwards;
+}

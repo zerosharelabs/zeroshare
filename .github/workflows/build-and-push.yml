@@ -1,0 +1,74 @@
+name: build-and-push
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Set image tag
+        id: set_tag
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            TAG=pr-${{ github.event.pull_request.number }}
+          elif [[ "$GITHUB_EVENT_NAME" == "release" ]]; then
+            TAG=${{ github.event.release.tag_name }}
+          elif [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+              if [[ "${{ github.event.head_commit.author.name }}" == "GitHub" ]]; then
+                TAG=latest
+              else
+                TAG=$(echo $GITHUB_SHA | cut -c1-7)
+              fi
+            elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+              TAG=latest
+            else
+              TAG=latest
+            fi
+          else
+            TAG=$(echo $GITHUB_SHA | cut -c1-7)
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Build and tag image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}:${{ steps.set_tag.outputs.tag }} -f docker/Dockerfile .
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then
+            docker tag ghcr.io/${{ github.repository }}:${{ steps.set_tag.outputs.tag }} ghcr.io/${{ github.repository }}:latest
+          fi
+
+      - name: Push image to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository }}:${{ steps.set_tag.outputs.tag }}
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then
+            docker push ghcr.io/${{ github.repository }}:latest
+          fi
+
+      - name: Make image public
+        run: |
+          curl -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" \
+            https://api.github.com/orgs/zerosharelabs/packages/container/zeroshare/visibility \
+            -d '{"visibility":"public"}'
+
+      - name: Summary
+        run: |
+          echo "Docker image built and pushed to: ghcr.io/${{ github.repository }}:${{ steps.set_tag.outputs.tag }}"
