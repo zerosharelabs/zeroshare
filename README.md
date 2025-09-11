@@ -5,15 +5,24 @@
   <br>
   <a href="https://zeroshare.io">zeroshare.io</a>
   <br><br>
+
+  <div align="">
+  <a href="#"><img src="https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB" alt="React" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff" alt="TypeScript" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white" alt="Next.js" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white" alt="Node.js" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff" alt="Docker" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white" alt="Postgres" /></a>
+</div>
+<br/>
   <!-- GitHub Badges -->
-  <a href="https://github.com/zerosharelabs/zeroshare/stargazers"><img src="https://img.shields.io/github/stars/zerosharelabs/zeroshare?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/zerosharelabs/zeroshare/stargazers"><img src="https://img.shields.io/github/stars/zerosharelabs/zeroshare?style=flat" alt="GitHub stars"></a>
   <a href="https://github.com/zerosharelabs/zeroshare/releases"><img src="https://img.shields.io/github/v/release/zerosharelabs/zeroshare?label=release" alt="Release"></a>
   <a href="https://github.com/zerosharelabs/zeroshare/blob/main/LICENSE"><img src="https://img.shields.io/github/license/zerosharelabs/zeroshare" alt="License"></a>
 </div>
 <br/>
-Securely Share Passwords, Secrets or Sensitive Information With Self-Destructing Links.
-Send sensitive information with Client-Side AES-GCM Encryption, One-Time Self-Destructing Links, Zero Logs & Zero Activity Tracking.
-<br/><br/>
+<p align="center">Securely Share Passwords, Secrets or Sensitive Information With Self-Destructing Links.
+Send sensitive information with Client-Side AES-GCM Encryption, One-Time Self-Destructing Links, Zero Logs & Zero Activity Tracking.</p>
 
 ![ZeroShare](github.png)
 
