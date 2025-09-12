@@ -13,12 +13,25 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth";
 import { SquareArrowUpRight } from "lucide-react";
+import Icon from "./Icon";
 
 const SHOWLOGIN_AND_SIGNUP = true;
 
-const NAVIGATION_LINKS = [
+const NAVIGATION_LINKS: {
+  href: string;
+  label: string;
+  target?: string;
+  prefixIcon?: React.ReactNode;
+  suffixIcon?: React.ReactNode;
+}[] = [
   { href: "/#features", label: "How It Works" },
   { href: "/#privacy-first", label: "Privacy-First" },
+  {
+    href: "https://github.com/zerosharelabs/zeroshare",
+    label: "Open Source",
+    target: "_blank",
+    suffixIcon: <Icon name="arrow_outward" size={14} />,
+  },
 ];
 
 export default function Navigation() {
@@ -34,14 +47,18 @@ export default function Navigation() {
         <div className="mx-auto w-full md:w-auto px-4 py-2 bg-neutral-900 border border-neutral-800 h-12 mt-5">
           <div className="flex items-center justify-between h-full gap-5 p-1">
             <Logo height={20} />
+            <CurrentVersion />
             <div className="items-center justify-between h-full gap-5 hidden md:flex">
-              <CurrentVersion />
               <Separator />
+
               {NAVIGATION_LINKS.map((link) => (
-                <NavLink key={link.href} href={link.href}>
+                <NavLink key={link.href} href={link.href} target={link?.target}>
+                  {link.prefixIcon}
                   {link.label}
+                  {link.suffixIcon}
                 </NavLink>
               ))}
+
               <Separator />
               {SHOWLOGIN_AND_SIGNUP && <LoginAndSignUp />}
             </div>
@@ -169,14 +186,16 @@ type NavLinkProps = {
   href: string;
   children: React.ReactNode;
   className?: string;
+  target?: string;
 };
 
-const NavLink = ({ href, children, className }: NavLinkProps) => {
+const NavLink = ({ href, children, className, target }: NavLinkProps) => {
   return (
     <a
+      target={target}
       href={href}
       className={cn(
-        "text-neutral-300 hover:text-white font-mono text-base md:text-sm flex items-center justify-center whitespace-nowrap gap-2",
+        "text-neutral-300 hover:text-white font-mono font-medium text-base md:text-xs flex items-center justify-center whitespace-nowrap gap-2",
         className
       )}
     >

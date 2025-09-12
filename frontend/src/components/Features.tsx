@@ -55,15 +55,18 @@ export default function Features() {
         <div className={"flex items-center justify-center gap-2"}>
           <HeartIcon size={17} className={"text-neutral-200"} />
           Open Source{" "}
-          <span
-            className={
-              "uppercase text-[10px] leading-0 bg-yellow-900 text-yellow-300 rounded-none px-2 py-2.5"
-            }
-          >
-            Soon
-          </span>
         </div>
       </div>
     </div>
   );
 }
+
+const SoonBadge = () => (
+  <span
+    className={
+      "uppercase text-[10px] leading-0 bg-yellow-900 text-yellow-300 rounded-none px-2 py-2.5"
+    }
+  >
+    Soon
+  </span>
+);
