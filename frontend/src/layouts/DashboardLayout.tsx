@@ -1,6 +1,7 @@
 "use client";
 
 import SecondaryButton from "@/components/common/SecondaryButton";
+import CurrentVersion from "@/components/CurrentVersion";
 import Icon from "@/components/Icon";
 import Layout from "@/components/Layout";
 import SessionLost from "@/components/SessionLost";
@@ -40,9 +41,7 @@ export default function DashboardLayout({ children }: Props) {
         <nav className="w-full justify-between flex items-center py-5 border-b border-neutral-850 px-6 h-18 sticky top-0 left-0 bg-neutral-940 z-50">
           <div className="flex items-center gap-4 leading-0">
             <Logo width={130} />
-            <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap mt-1">
-              v0.0.2
-            </span>
+            <CurrentVersion />
           </div>
 
           <div className="flex gap-4 items-center">

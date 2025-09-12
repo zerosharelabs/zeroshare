@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth";
 import { SquareArrowUpRight } from "lucide-react";
 import Icon from "./Icon";
+import CurrentVersion from "./CurrentVersion";
 
 const SHOWLOGIN_AND_SIGNUP = true;
 
@@ -174,13 +175,6 @@ const HorizontalSeparator = () => {
   );
 };
 
-const CurrentVersion = () => {
-  return (
-    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap">
-      v0.0.2
-    </span>
-  );
-};
 
 type NavLinkProps = {
   href: string;

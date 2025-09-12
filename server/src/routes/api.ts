@@ -19,7 +19,7 @@ export async function healthCheck(
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || "unknown",
-      version: process.env.npm_package_version || "unknown",
+      version: process.env.APP_VERSION || process.env.npm_package_version || "unknown",
       database: "connected",
     });
   } catch {
@@ -28,7 +28,7 @@ export async function healthCheck(
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || "unknown",
-      version: process.env.npm_package_version || "unknown",
+      version: process.env.APP_VERSION || process.env.npm_package_version || "unknown",
       database: "disconnected",
       error: "Database connection failed",
     });
@@ -60,6 +60,12 @@ export async function getStatistics(
   }
 }
 
+export async function getVersion(req: Request, res: Response) {
+  res.status(200).json({
+    version: process.env.APP_VERSION || process.env.npm_package_version || "unknown",
+  });
+}
+
 export async function getPublicKeyHandler(req: Request, res: Response) {
   try {
     const publicKey = getPublicKey();
@@ -71,6 +77,7 @@ export async function getPublicKeyHandler(req: Request, res: Response) {
 
 // Routes
 router.get("/health", healthCheck);
+router.get("/version", getVersion);
 router.get("/statistics", getStatistics);
 router.get("/public-key", getPublicKeyHandler);
 router.post("/feedback", sendFeedbackRequest);

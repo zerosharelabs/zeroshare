@@ -17,7 +17,12 @@ RUN npm run build
 
 # --- Final production image ---
 FROM node:20-alpine
-RUN apk add --no-cache openssl bash curl nginx certbot supervisor certbot-nginx
+
+# Build argument for version (passed from GitHub Actions or build command)
+ARG APP_VERSION=unknown
+ENV APP_VERSION=$APP_VERSION
+
+RUN apk add --no-cache openssl bash curl nginx certbot supervisor certbot-nginx git
 RUN mkdir -p /app/server /app/frontend /etc/nginx /usr/share/nginx/html /etc/letsencrypt /var/log/supervisor
 WORKDIR /app
 
