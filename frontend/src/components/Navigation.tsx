@@ -175,7 +175,6 @@ const HorizontalSeparator = () => {
   );
 };
 
-
 type NavLinkProps = {
   href: string;
   children: React.ReactNode;
