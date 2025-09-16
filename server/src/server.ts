@@ -19,7 +19,12 @@ import apiRoutes from "@/routes";
 import { deleteExpiredShares } from "@/utils/cleanup";
 import { log } from "@/utils/logger";
 
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+if (process.env.NODE_ENV === "production"){
+    dotenv.config({ path: path.join(__dirname, "../../.env") });
+} else{
+    dotenv.config({ path: path.join(__dirname, "../.env") });
+}
+
 
 const numCPUs = os.cpus().length;
 const PORT = 3030;
