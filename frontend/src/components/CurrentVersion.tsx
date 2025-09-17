@@ -51,7 +51,7 @@ async function CurrentVersionServerContent() {
   const version = await fetchVersionServer();
 
   return (
-    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap">
+    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap hidden md:inline">
       {version}
     </span>
   );
@@ -59,7 +59,7 @@ async function CurrentVersionServerContent() {
 
 function CurrentVersionServerFallback() {
   return (
-    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap">
+    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap hidden md:inline">
       {DEFAULT_VERSION}
     </span>
   );
@@ -74,7 +74,7 @@ function CurrentVersionContent() {
     : DEFAULT_VERSION;
 
   return (
-    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap">
+    <span className="text-neutral-300 font-mono text-sm md:text-xs whitespace-nowrap hidden md:inline">
       {isPending ? DEFAULT_VERSION : (isError ? DEFAULT_VERSION : version)}
     </span>
   );
