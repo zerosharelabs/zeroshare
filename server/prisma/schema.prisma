@@ -23,6 +23,7 @@ model Secret {
   updatedAt           DateTime? @updatedAt
   userId              String?
   accountId           String?
+  type                String    @default("text")
   account             Account?  @relation(fields: [accountId], references: [id], onDelete: Cascade)
   user                User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -109,6 +110,7 @@ model Organization {
   logo        String?
   createdAt   DateTime
   metadata    String?
+  plan        String       @default("free")
   invitations Invitation[]
   members     Member[]
 

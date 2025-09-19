@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { MAX_FILE_SIZE_BYTES } from "@/config/server";
 
 const VALID_EXPIRATION_TIMES = [
   { label: "10 Minutes", value: 600 },
@@ -89,5 +90,27 @@ export const validatePassword = (
       return;
     }
   }
+  next();
+};
+
+export const validateAttachment = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const { attachment, encryptedData } = req.body;
+
+  if (attachment === true) {
+    const encryptedDataSize = Buffer.byteLength(encryptedData, "utf8");
+
+
+    if (encryptedDataSize > MAX_FILE_SIZE_BYTES * 2) { // Allow some overhead for encryption
+      res.status(413).json({
+        error: `File size exceeds maximum limit of ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB`
+      });
+      return;
+    }
+  }
+
   next();
 };

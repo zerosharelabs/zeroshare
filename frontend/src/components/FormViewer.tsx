@@ -8,11 +8,16 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import Textarea from "@/components/common/Textarea";
 import Input from "@/components/common/Input";
 import ErrorCard from "@/components/ErrorCard";
+import Icon from "@/components/Icon";
 import { apiUrl } from "@/lib/api";
 import { isValidHashFragment } from "@/lib/validation";
 import { useLocationHash } from "@/hooks/useLocationHash";
+
 import Heading1 from "./typography/Heading1";
 import HeadingDescription from "./typography/HeadingDescription";
+import {cn} from "@/lib/utils";
+import {formatFileSize} from "@/modules/share-a-secret/FileUploadArea";
+import SecondaryButton from "@/components/common/SecondaryButton";
 
 export function FormViewer() {
   const [password, setPassword] = useState("");
@@ -20,10 +25,12 @@ export function FormViewer() {
   const [url, setUrl] = useState("");
 
   const [data, setData] = useState<string>("");
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [notFound, setNotFound] = useState(false);
+  const [shareType, setShareType] = useState<"text" | "file" | null>(null);
 
   useEffect(() => {
     // Validate hash format
@@ -43,7 +50,7 @@ export function FormViewer() {
 
   useEffect(() => {
     const linkId = url.substring(0, 16);
-    const fetchProtected = async () => {
+    const detectShareType = async () => {
       try {
         const response = await fetch(apiUrl(`/secure/${linkId}`));
         if (!response.ok) {
@@ -55,8 +62,9 @@ export function FormViewer() {
           return;
         }
 
-        const { protected: isProtected } = await response.json();
+        const { protected: isProtected, type } = await response.json();
         setIsProtected(isProtected);
+        setShareType(type);
       } catch (err) {
         const errMessage =
           err instanceof Error ? err.message : "Failed to load share";
@@ -66,13 +74,14 @@ export function FormViewer() {
     };
 
     if (url && linkId) {
-      fetchProtected();
+      detectShareType();
     }
   }, [url]);
 
   const reveal = async () => {
     setLoading(true);
     setData("");
+    setAttachment(null);
 
     try {
       const secretKey = url.substring(16);
@@ -108,7 +117,8 @@ export function FormViewer() {
         linkId
       );
 
-      setData(decrypted.data);
+      setData(decrypted.text.data);
+      setAttachment(decrypted.attachment);
       setError(null);
       setNotFound(false);
     } catch (err) {
@@ -119,6 +129,23 @@ export function FormViewer() {
       setLoading(false);
     }
   };
+
+  const downloadAttachment = () => {
+
+        if (!attachment) return;
+      const url = URL.createObjectURL(attachment);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = attachment.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      setAttachment(null);
+
+    };
+
 
   return (
     <div>
@@ -132,13 +159,23 @@ export function FormViewer() {
             closing this page.
           </HeadingDescription>
 
+
+            {shareType === "file" &&   <div className={"max-w-2xl bg-yellow-950 border border-yellow-900 mx-auto px-4 my-8"}>
+                <HeadingDescription className={"text-sm text-yellow-400"}>
+                    Important: This secret includes a file attachment.
+                    Please ensure you trust the sender before viewing or downloading the file, as we cannot verify the safety of the attached file.
+                </HeadingDescription>
+            </div>}
+
+
           <div
             className={
-              "max-w-2xl mx-auto flex items-center justify-center flex-wrap gap-4 mt-10 mb-12"
+              "max-w-2xl mx-auto flex items-center justify-center flex-wrap gap-4 mb-12"
             }
           >
             {!notFound && (
-              <div className={"w-full relative"}>
+              <div className={"w-full relative space-y-4"}>
+                {/* Text content */}
                 <Textarea
                   cols={30}
                   disabled={!data}
@@ -146,6 +183,32 @@ export function FormViewer() {
                   value={data}
                   readOnly
                 />
+
+                  {/* Attachment download */}
+                  {attachment && (
+                      <div className="bg-neutral-925 border border-neutral-800 p-4 my-8">
+                          <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                  <div className={cn("h-10 w-10 bg-neutral-925 border border-neutral-800 flex items-center justify-center")}>
+                                    <Icon name="attach_file" size={20} className="text-neutral-400" />
+                                  </div>
+                                  <div>
+                                      <p className="text-sm font-medium text-neutral-200">{attachment.name}</p>
+                                      <p className="text-xs text-neutral-400">{formatFileSize(attachment.size)}</p>
+                                  </div>
+                              </div>
+
+
+                              <div><SecondaryButton onClick={downloadAttachment}>
+                                  <Icon name="download" size={16}  />
+                                  Download
+                              </SecondaryButton></div>
+
+
+
+                          </div>
+                      </div>
+                  )}
 
                 {!data && !notFound && (
                   <div
@@ -197,6 +260,7 @@ export function FormViewer() {
 
             <ErrorCard error={error} />
           </div>
+
 
           <Logo promo={true} width={180} />
         </div>

@@ -14,8 +14,8 @@ import SecretExpirationSelect from "./SecretExpirationSelect";
 import SecretPasswordInput from "./SecretPasswordInput";
 import SecretSubmitButton from "./SecretSubmitButton";
 import SecretAdvancedOptionsSwitch from "./SecretAdvancedOptionsSwitch";
+import FileUploadArea from "./FileUploadArea";
 
-const REQUESTS_ENABLED = false;
 const DEFAULT_EXPIRATION = 60 * 60 * 24;
 
 type Props = {
@@ -40,75 +40,87 @@ export default function ShareSecretForm({
   const [advancedOptions, setAdvancedOptions] = useState(
     initialAdvancedOptions
   );
-  const [activeTab, setActiveTab] = useState<"share" | "request">("share");
+  const [file, setFile] = useState<File | null>(null);
 
   const passwordRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const clearFields = () => {
     setData("");
+    setFile(null);
     setPassword("");
     setExpiresIn(DEFAULT_EXPIRATION);
     setError(null);
     setShareUrl(undefined);
     setAdvancedOptions(false);
-    setActiveTab("share");
   };
+
+  const handleTextWithAttachment = async () => {
+    // Validate input - text is required, file is optional
+    const dataValidation = validateSecretData(data);
+    if (!dataValidation.valid) {
+      setError(dataValidation.message!);
+      return false;
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.message!);
+      return false;
+    }
+
+    // Generate share link
+    const { linkId, secretKey } = SecureShare.generateShareLink();
+
+    // Encrypt data with optional attachment
+    const encrypted = await SecureShare.encrypt(
+      { data },
+      file,
+      secretKey,
+      linkId
+    );
+    const expiration = advancedOptions ? expiresIn : DEFAULT_EXPIRATION;
+
+    // Store encrypted data using fetchApi (includes credentials)
+    const response = await fetchApi("/secure", {
+      method: "POST",
+      body: JSON.stringify({
+        linkId,
+        encryptedData: encrypted.encrypted,
+        iv: encrypted.iv,
+        expiresIn: expiration,
+        attachment: encrypted.attachment,
+        password:
+          advancedOptions && password
+            ? btoa(unescape(encodeURIComponent(password)))
+            : undefined,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ error: "Unknown error occurred" }));
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`
+      );
+    }
+
+    setShareUrl(`${window.location.origin}/secure#${linkId + secretKey}`);
+    setOpen(true);
+    setData("");
+    setFile(null);
+    return true;
+  };
+
 
   const handleShare = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Validate input
-    const dataValidation = validateSecretData(data);
-    if (!dataValidation.valid) {
-      setError(dataValidation.message!);
-      setLoading(false);
-      return;
-    }
-
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-      setError(passwordValidation.message!);
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Generate share link
-      const { linkId, secretKey } = SecureShare.generateShareLink();
-
-      // Encrypt data
-      const encrypted = await SecureShare.encrypt({ data }, secretKey, linkId);
-      const expiration = advancedOptions ? expiresIn : DEFAULT_EXPIRATION;
-
-      // Store encrypted data using fetchApi (includes credentials)
-      const response = await fetchApi("/secure", {
-        method: "POST",
-        body: JSON.stringify({
-          linkId,
-          encryptedData: encrypted.encrypted,
-          iv: encrypted.iv,
-          expiresIn: expiration,
-          password:
-            advancedOptions && password
-              ? btoa(unescape(encodeURIComponent(password)))
-              : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Unknown error occurred" }));
-        throw new Error(
-          errorData.error || `HTTP ${response.status}: ${response.statusText}`
-        );
-      }
-
-      setShareUrl(`${window.location.origin}/secure#${linkId + secretKey}`);
-      setOpen(true);
+      await handleTextWithAttachment();
     } catch (err) {
       console.error(err);
       const errMessage =
@@ -116,7 +128,6 @@ export default function ShareSecretForm({
       setError(errMessage);
     } finally {
       setLoading(false);
-      setData("");
     }
   };
 
@@ -143,6 +154,7 @@ export default function ShareSecretForm({
         )}
         onSubmit={handleShare}
       >
+        {/* Text input */}
         <SecretTextarea
           data={data}
           loading={loading}
@@ -161,9 +173,9 @@ export default function ShareSecretForm({
 
         <div
           className={cn(
-            "  w-full transition-all duration-300 flex flex-col gap-8",
+            "  w-full transition-all duration-300 flex flex-col gap-6",
             advancedOptions
-              ? "mt-2 h-[20rem] sm:h-[16rem] opacity-100"
+              ? "mt-2 h-[32rem] sm:h-[28rem] opacity-100"
               : "opacity-0 h-0"
           )}
         >
@@ -178,6 +190,25 @@ export default function ShareSecretForm({
             expiresIn={expiresIn}
             setExpiresIn={setExpiresIn}
           />
+
+          {/* File attachment in advanced settings */}
+            <fieldset className="flex flex-col gap-2">
+                <div>
+                    <label className="font-medium text-neutral-300 text-sm">
+                        File Attachment (Optional)
+                    </label>
+                    <p className="text-neutral-400 text-xs">
+                        You can optionally attach a file to be encrypted along with your
+                        secret message.
+                    </p>
+                </div>
+            <FileUploadArea
+              file={file}
+              loading={loading}
+              setFile={setFile}
+              disabled={false}
+            />
+            </fieldset>
         </div>
 
         {children}

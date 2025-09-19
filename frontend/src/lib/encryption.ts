@@ -53,23 +53,51 @@ export class SecureShare {
     );
   }
 
-  static async encrypt(data: unknown, secretKey: string, linkId: string) {
+  static async encrypt(
+    textData: unknown,
+    file: File | null,
+    secretKey: string,
+    linkId: string
+  ) {
     const key = await this.deriveKey(secretKey, linkId);
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoder = new TextEncoder();
 
+    let fileData = null;
+    if (file) {
+      // Read file as ArrayBuffer and convert to array
+      const fileBuffer = await file.arrayBuffer();
+      fileData = {
+        metadata: {
+          fileName: file.name,
+          fileSize: file.size,
+          mimeType: file.type,
+          lastModified: file.lastModified,
+        },
+        data: Array.from(new Uint8Array(fileBuffer)),
+      };
+    }
+
+    // Combine text and file data
+    const combinedData = {
+      text: textData,
+      attachment: fileData,
+    };
+
+    // Encrypt the combined data
+    const encoder = new TextEncoder();
     const encrypted = await crypto.subtle.encrypt(
       {
         name: "AES-GCM",
         iv: iv,
       },
       key,
-      encoder.encode(JSON.stringify(data))
+      encoder.encode(JSON.stringify(combinedData))
     );
 
     return {
       encrypted: this.bufferToBase64(encrypted),
       iv: this.bufferToBase64(iv.buffer),
+      attachment: !!file,
     };
   }
 
@@ -92,12 +120,33 @@ export class SecureShare {
         this.base64ToBuffer(encryptedData)
       );
 
-      return JSON.parse(decoder.decode(decrypted));
+      const combinedData = JSON.parse(decoder.decode(decrypted));
+
+     if (combinedData.text !== undefined || combinedData.attachment !== undefined) {
+        let attachmentFile = null;
+        if (combinedData.attachment) {
+          const { metadata, data } = combinedData.attachment;
+          const fileBuffer = new Uint8Array(data);
+          const blob = new Blob([fileBuffer], { type: metadata.mimeType });
+          attachmentFile = new File([blob], metadata.fileName, {
+            type: metadata.mimeType,
+            lastModified: metadata.lastModified || Date.now(),
+          });
+        }
+
+        return {
+          text: combinedData.text,
+          attachment: attachmentFile,
+        };
+      }
+
+      return combinedData;
     } catch (error) {
       console.error("Decryption failed:", error);
       throw new Error("Decryption failed");
     }
   }
+
 
   static bufferToBase64(buffer: ArrayBuffer) {
     return Buffer.from(buffer)
@@ -113,32 +162,36 @@ export class SecureShare {
     return Buffer.from(base64, "base64");
   }
 
-  static formatAsUUID(str: string): string {
-    if (str.length !== 32) {
-      throw new Error("Input string must be exactly 32 characters");
-    }
+  static async decryptFile(
+    encryptedData: string,
+    iv: string,
+    secretKey: string,
+    linkId: string
+  ): Promise<File> {
+    const key = await this.deriveKey(secretKey, linkId);
+    const decoder = new TextDecoder();
 
-    const segments = [
-      str.slice(0, 8), // 8 chars
-      str.slice(8, 12), // 4 chars
-      str.slice(12, 16), // 4 chars
-      str.slice(16, 20), // 4 chars
-      str.slice(20, 32), // 12 chars
-    ];
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: this.base64ToBuffer(iv),
+      },
+      key,
+      this.base64ToBuffer(encryptedData)
+    );
 
-    return segments.join("-");
-  }
+    // Parse the decrypted data to extract metadata and file content
+    const fileWithMetadata = JSON.parse(decoder.decode(decrypted));
+    const { metadata, data } = fileWithMetadata;
 
-  static revertUUID(uuid: string): string {
-    // Remove all hyphens
-    const stripped = uuid.replace(/-/g, "");
+    // Convert array back to Uint8Array
+    const fileBuffer = new Uint8Array(data);
 
-    if (stripped.length !== 32) {
-      throw new Error(
-        "Invalid UUID format - should contain 32 characters excluding hyphens"
-      );
-    }
-
-    return stripped;
+    // Create a new File object from the decrypted data
+    const blob = new Blob([fileBuffer], { type: metadata.mimeType });
+    return new File([blob], metadata.fileName, {
+      type: metadata.mimeType,
+      lastModified: metadata.lastModified || Date.now(),
+    });
   }
 }

@@ -9,13 +9,13 @@ import {
   updatePasswordAttempts,
 } from "@/config/encryption";
 import { incrementStat } from "@/utils/stats";
-import { TimeUnit } from "@/utils/types";
 import prisma from "@/config/database";
 import { getBytes } from "@/utils";
 import {
   validateCreateSecureShare,
   validateLinkId,
   validatePassword,
+  validateAttachment,
 } from "@/utils/validation";
 import { authorized } from "@/middleware";
 
@@ -36,6 +36,7 @@ export async function createSecureShare(
       iv,
       expiresIn = 60 * 60 * 24,
       password,
+      attachment = false,
     } = req.body;
 
     let hashedPassword;
@@ -63,6 +64,7 @@ export async function createSecureShare(
         expiresAt: dayjs().add(expiresIn, "second").toDate(),
         accountId: req.account?.id,
         userId: req.user?.id,
+        type: attachment ? "file" : "text",
       },
     });
 
@@ -70,6 +72,9 @@ export async function createSecureShare(
       await incrementStat("links_created", 1);
       if (hashedPassword) {
         await incrementStat("links_created_with_password", 1);
+      }
+      if (attachment) {
+        await incrementStat("links_created_with_attachment", 1);
       }
     } catch (statError) {
       console.error("Failed to increment stats:", statError);
@@ -91,6 +96,9 @@ export async function getSecureShareInitialInformation(
     const share = await prisma.secret.findUnique({
       where: {
         linkId,
+          encryptedData : {
+            not: "0"
+          }
       },
     });
 
@@ -103,7 +111,8 @@ export async function getSecureShareInitialInformation(
     }
 
     res.status(200).json({
-      protected: !!share?.passwordHash,
+        protected: !!share?.passwordHash,
+        type: share.type,
     });
   } catch (error) {
     console.error("Share retrieval failed:", error);
@@ -228,82 +237,11 @@ export const revokeShare = async (id: string, data: string) => {
   await incrementStat("bytes_destroyed", byteSize);
 };
 
-export const deleteShare = async (id: string) => {
-  const share = await prisma.secret.findUnique({
-    where: { id },
-  });
-  if (share && share.encryptedData !== "0") {
-    const byteSize = getBytes(share.encryptedData);
-    await incrementStat("bytes_destroyed", byteSize);
-  }
-  await prisma.secret.delete({
-    where: { id },
-  });
-};
-
-export const revokeSecureShareHandler = async (
-  req: Request<{ id: string }>,
-  res: Response
-): Promise<Response | void> => {
-  try {
-    const { id } = req.params;
-    const secureShare = await prisma.secret.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (req.user && secureShare?.userId !== req.user.id) {
-      return res.status(403).json({ error: "You do not have permission" });
-    }
-
-    if (!secureShare) {
-      return res.status(404).json({ error: "Secure share not found" });
-    }
-
-    await revokeShare(secureShare.id, secureShare.encryptedData);
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Failed to revoke secure share:", error);
-    return res.status(500).json({ error: "Failed to revoke secure share" });
-  }
-};
-
-export const deleteSecureShareHandler = async (
-  req: Request<{ id: string }>,
-  res: Response
-): Promise<Response | void> => {
-  try {
-    const { id } = req.params;
-    const secureShare = await prisma.secret.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!secureShare) {
-      return res.status(404).json({ error: "Secure share not found" });
-    }
-
-    if (req.user && secureShare?.userId !== req.user.id) {
-      return res.status(403).json({ error: "You do not have permission" });
-    }
-
-    await deleteShare(secureShare.id);
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete secure share:", error);
-    return res.status(500).json({ error: "Failed to delete secure share" });
-  }
-};
-
-// Routes
 router.post(
   "/",
   validateCreateSecureShare,
   validatePassword,
+  validateAttachment,
   authorized,
   createSecureShare as any
 );
